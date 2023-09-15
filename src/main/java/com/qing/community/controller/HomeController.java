@@ -28,7 +28,7 @@ public class HomeController {
     private UserService userService;
 
     @RequestMapping(path = "/index", method = RequestMethod.GET)
-    //返回html，不用加responseBody
+    //@responsebody注解表示将方法的返回值直接放到http响应体中，比如cookie
     public String getIndexPage(Model model, Page page) {
         //方法调用前，springmvc会自动实例化model和page，并将page注入到model
         //所以thymeleaf可以直接访问page对象的数据

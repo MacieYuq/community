@@ -1,7 +1,10 @@
 package com.qing.community.service;
 
+import com.qing.community.dao.LoginTicketMapper;
 import com.qing.community.dao.UserMapper;
+import com.qing.community.entity.LoginTicket;
 import com.qing.community.entity.User;
+import com.qing.community.utils.ActivationStatus;
 import com.qing.community.utils.MailClient;
 import com.qing.community.utils.RandomStr;
 import org.apache.commons.lang3.StringUtils;
@@ -17,7 +20,7 @@ import java.util.Map;
 import java.util.Random;
 
 @Service
-public class UserService {
+public class UserService  implements ActivationStatus {
     @Autowired
     private UserMapper userMapper;
 
@@ -26,6 +29,9 @@ public class UserService {
 
     @Autowired
     private TemplateEngine templateEngine;
+
+    @Autowired
+    private LoginTicketMapper loginTicketMapper;
 
     //注入域名
     @Value("${community.path.domain}")
@@ -84,7 +90,7 @@ public class UserService {
         Context context = new Context();
         context.setVariable("email", user.getEmail());//对应activation.html中的动态变量
         // http://localhost:8080/community/activation/101/code
-        String url = domain + contextPath + "/activation/" + user.getId() + user.getActivationCode();
+        String url = domain + contextPath + "/activation/" + user.getId() + "/" + user.getActivationCode();
         context.setVariable("url", url);
         //用模板引擎导入邮件内容
         String content = templateEngine.process("/mail/activation", context);//第一个参数为html文件路径
@@ -92,6 +98,64 @@ public class UserService {
         mailClient.sendMail(user.getEmail(), "激活邮件", content);
 
         return map;
+    }
+
+    //激活页面
+    public int activation(int userId, String code){
+        User user = userMapper.selectById(userId);
+        if(user.getStatus() == 1){
+            return ACTIVATIONREPEAT;
+        }else if(!user.getActivationCode().equals(code)){
+            return ACTIVATIONFAIL;
+        }else{
+            userMapper.updateStatus(userId, 1);
+            return ACTIVATIONSUCCESS;
+        }
+    }
+
+    //登录
+    public Map<String, Object> login(String username, String password, int expireSeconds){
+        Map<String, Object> map = new HashMap<>();
+
+        //空值处理
+        if(StringUtils.isBlank(username)){
+            map.put("usernameMsg", "账号不能为空！");
+            return map;
+        }if(StringUtils.isBlank(password)){
+            map.put("passwordMsg", "密码不能为空！");
+            return map;
+        }
+
+        //账号校验
+        User user = userMapper.selectByName(username);
+        if(user == null){
+            map.put("usernameMsg", "该用户不存在");
+            return map;
+        }
+        //激活校验
+        if(user.getStatus() == 0){
+            map.put("activationMsg", "该账号未激活！");
+            return map;
+        }
+        //密码校验
+        password = RandomStr.md5(password + user.getSalt());
+        if(!user.getPassword().equals(password)){
+            map.put("passwordMsg", "密码错误！");
+            return map;
+        }
+
+        //生成登录凭证
+        LoginTicket loginTicket = new LoginTicket();
+        loginTicket.setUserId(user.getId());
+        loginTicket.setTicket(RandomStr.generateUUID());
+        loginTicket.setStatus(0);
+        loginTicket.setExpired(new Date(System.currentTimeMillis() + expireSeconds * 1000));
+        loginTicketMapper.insertTicket(loginTicket);
+
+        map.put("loginTicket", loginTicket.getTicket());
+        return map;
+
+
 
     }
 }
