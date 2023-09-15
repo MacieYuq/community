@@ -114,7 +114,7 @@ public class UserService  implements ActivationStatus {
     }
 
     //登录
-    public Map<String, Object> login(String username, String password, int expireSeconds){
+    public Map<String, Object> login(String username, String password, long expireSeconds){
         Map<String, Object> map = new HashMap<>();
 
         //空值处理
@@ -154,8 +154,11 @@ public class UserService  implements ActivationStatus {
 
         map.put("loginTicket", loginTicket.getTicket());
         return map;
+    }
 
-
+        //登出
+        public void logout(String ticket){
+        loginTicketMapper.updateTicket(ticket, 1);
 
     }
 }
