@@ -109,7 +109,7 @@ public class LoginController implements ActivationStatus {
         String kaptcha = (String) session.getAttribute("kaptcha");
         if(StringUtils.isBlank(kaptcha) || StringUtils.isBlank(code) || !kaptcha.equalsIgnoreCase(code)){
             model.addAttribute("codeMsg","验证码错误！");
-            return "site/login";
+            return "/site/login";
         }
 
         //检查账号和密码是否正确，如果业务层返回的map包含ticket说明账号密码无误

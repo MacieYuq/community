@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Random;
 
 @Service
-public class UserService  implements ActivationStatus {
+public class UserService implements ActivationStatus {
     @Autowired
     private UserMapper userMapper;
 
@@ -39,45 +39,46 @@ public class UserService  implements ActivationStatus {
     //注入路径
     @Value("${server.servlet.context-path}")
     private String contextPath;
-    public User findByUserById (int id){
+
+    public User findByUserById(int id) {
         return userMapper.selectById(id);
     }
 
     //注册功能
-    public Map<String, Object> register(User user){
+    public Map<String, Object> register(User user) {
         Map<String, Object> map = new HashMap<>();
 
         //空值处理
-        if(user == null){
+        if (user == null) {
             throw new IllegalArgumentException("用户参数错误");
         }
-        if(StringUtils.isBlank(user.getUsername())){
+        if (StringUtils.isBlank(user.getUsername())) {
             map.put("usernameMsg", "用户名不能为空！");
             return map;
         }
-        if(StringUtils.isBlank(user.getEmail())){
+        if (StringUtils.isBlank(user.getEmail())) {
             map.put("emailMsg", "邮箱不能为空！");
             return map;
         }
-        if(StringUtils.isBlank(user.getPassword())){
+        if (StringUtils.isBlank(user.getPassword())) {
             map.put("passwordMsg", "密码不能为空！");
             return map;
         }
 
         //重复处理
         User u = userMapper.selectByName(user.getUsername());
-        if(u != null){
-            map.put("usernameMsg","该用户已存在！");
+        if (u != null) {
+            map.put("usernameMsg", "该用户已存在！");
             return map;
         }
         u = userMapper.selectByEmail(user.getEmail());
-        if(u != null){
-            map.put("emailMsg","该邮箱已存在！");
+        if (u != null) {
+            map.put("emailMsg", "该邮箱已存在！");
             return map;
         }
 
         //注册用户
-        user.setSalt(RandomStr.generateUUID().substring(0,5));
+        user.setSalt(RandomStr.generateUUID().substring(0, 5));
         user.setPassword(RandomStr.md5(user.getPassword() + user.getSalt()));
         user.setActivationCode(RandomStr.generateUUID());
         user.setStatus(0);
@@ -101,45 +102,46 @@ public class UserService  implements ActivationStatus {
     }
 
     //激活页面
-    public int activation(int userId, String code){
+    public int activation(int userId, String code) {
         User user = userMapper.selectById(userId);
-        if(user.getStatus() == 1){
+        if (user.getStatus() == 1) {
             return ACTIVATIONREPEAT;
-        }else if(!user.getActivationCode().equals(code)){
+        } else if (!user.getActivationCode().equals(code)) {
             return ACTIVATIONFAIL;
-        }else{
+        } else {
             userMapper.updateStatus(userId, 1);
             return ACTIVATIONSUCCESS;
         }
     }
 
     //登录
-    public Map<String, Object> login(String username, String password, long expireSeconds){
+    public Map<String, Object> login(String username, String password, long expireSeconds) {
         Map<String, Object> map = new HashMap<>();
 
         //空值处理
-        if(StringUtils.isBlank(username)){
+        if (StringUtils.isBlank(username)) {
             map.put("usernameMsg", "账号不能为空！");
             return map;
-        }if(StringUtils.isBlank(password)){
+        }
+        if (StringUtils.isBlank(password)) {
             map.put("passwordMsg", "密码不能为空！");
             return map;
         }
 
         //账号校验
         User user = userMapper.selectByName(username);
-        if(user == null){
+        if (user == null) {
             map.put("usernameMsg", "该用户不存在");
             return map;
         }
         //激活校验
-        if(user.getStatus() == 0){
+        if (user.getStatus() == 0) {
             map.put("activationMsg", "该账号未激活！");
             return map;
         }
         //密码校验
         password = RandomStr.md5(password + user.getSalt());
-        if(!user.getPassword().equals(password)){
+        if (!user.getPassword().equals(password)) {
             map.put("passwordMsg", "密码错误！");
             return map;
         }
@@ -156,9 +158,19 @@ public class UserService  implements ActivationStatus {
         return map;
     }
 
-        //登出
-        public void logout(String ticket){
+    //登出
+    public void logout(String ticket) {
         loginTicketMapper.updateTicket(ticket, 1);
+    }
 
+    //查询凭证
+    public LoginTicket findTicket(String ticket) {
+        LoginTicket loginTicket = loginTicketMapper.selectByTicket(ticket);
+        return loginTicket;
+    }
+
+    //更新数据库中的头像链接
+    public int updateHeaderUrl(int userId, String url) {
+        return userMapper.updateHeader(userId, url);
     }
 }
