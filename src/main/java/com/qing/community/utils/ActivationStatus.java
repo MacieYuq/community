@@ -9,4 +9,14 @@ public interface ActivationStatus {
 
     int REMEMBER_EXPIRE_TIME = 3600 * 12 * 7;
 
+    /**
+     * 实体类型: 帖子
+     */
+    int ENTITY_TYPE_POST = 1;
+
+    /**
+     * 实体类型: 评论
+     */
+    int ENTITY_TYPE_COMMENT = 2;
+
 }

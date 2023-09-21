@@ -173,4 +173,8 @@ public class UserService implements ActivationStatus {
     public int updateHeaderUrl(int userId, String url) {
         return userMapper.updateHeader(userId, url);
     }
+
+    public User findUserByName(String username) {
+        return userMapper.selectByName(username);
+    }
 }
