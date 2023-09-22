@@ -6,8 +6,9 @@ import com.qing.community.entity.Page;
 import com.qing.community.entity.User;
 import com.qing.community.service.CommentService;
 import com.qing.community.service.DiscussPostService;
+import com.qing.community.service.LikeService;
 import com.qing.community.service.UserService;
-import com.qing.community.utils.ActivationStatus;
+import com.qing.community.utils.CommunityConstant;
 import com.qing.community.utils.CommunityUtil;
 import com.qing.community.utils.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ import java.util.*;
 
 @Controller
 @RequestMapping("/discuss")
-public class DiscussPostController implements ActivationStatus {
+public class DiscussPostController implements CommunityConstant {
 
     @Autowired
     private DiscussPostService discussPostService;
@@ -35,6 +36,9 @@ public class DiscussPostController implements ActivationStatus {
 
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private LikeService likeService;
 
 
     @RequestMapping(path = "/add", method = RequestMethod.POST)
@@ -64,6 +68,15 @@ public class DiscussPostController implements ActivationStatus {
         User user = userService.findByUserById(post.getUserId());
         model.addAttribute("user", user);
 
+        //点赞数量
+        long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, discussPostId);
+        model.addAttribute("likeCount", likeCount);
+
+        //点赞状态,未登录看不到是否已赞
+        int likeStatus = hostHolder.getUser() == null ? 0 :
+                likeService.findEntityLikeStatus(hostHolder.getUser().getId(), ENTITY_TYPE_POST, discussPostId);
+        model.addAttribute("likeStatus", likeStatus);
+
         //评论分页
         page.setLimit(5);//每页个数
         page.setPath("/discuss/detail/" + discussPostId);
@@ -80,6 +93,15 @@ public class DiscussPostController implements ActivationStatus {
                 commentVo.put("comment", comment);//放入评论
                 commentVo.put("user", userService.findByUserById(comment.getUserId()));//放入作者
 
+                //评论点赞数量
+                likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_COMMENT, comment.getId());
+                commentVo.put("likeCount", likeCount);
+                //评论点赞状态
+                likeStatus = hostHolder.getUser() == null ? 0 :
+                        likeService.findEntityLikeStatus(hostHolder.getUser().getId(), ENTITY_TYPE_COMMENT, comment.getId());
+                commentVo.put("likeStatus", likeStatus);
+
+
                 //对回复进行同样操作，但是要多处理TargetId,即回复对象
                 List<Comment> replyList = commentService.findCommentByEntity(
                         ENTITY_TYPE_COMMENT, comment.getId(), 0, Integer.MAX_VALUE);
@@ -92,6 +114,13 @@ public class DiscussPostController implements ActivationStatus {
                         //targetid为0表示没有回复对象，是主贴评论
                         User target = reply.getTargetId() == 0 ? null : userService.findByUserById(reply.getTargetId());
                         replyVo.put("target", target);
+                        // 回复的点赞数量
+                        likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_COMMENT, reply.getId());
+                        replyVo.put("likeCount", likeCount);
+                        // 回复的点赞状态
+                        likeStatus = hostHolder.getUser() == null ? 0 :
+                                likeService.findEntityLikeStatus(hostHolder.getUser().getId(), ENTITY_TYPE_COMMENT, reply.getId());
+                        replyVo.put("likeStatus", likeStatus);
 
                         replyVoList.add(replyVo);
                     }

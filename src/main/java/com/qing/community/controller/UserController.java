@@ -2,6 +2,7 @@ package com.qing.community.controller;
 
 import com.qing.community.annotation.LoginRequired;
 import com.qing.community.entity.User;
+import com.qing.community.service.LikeService;
 import com.qing.community.service.UserService;
 import com.qing.community.utils.HostHolder;
 import com.qing.community.utils.RandomStr;
@@ -35,6 +36,9 @@ public class UserController {
 
     @Autowired
     private HostHolder hostHolder;
+
+    @Autowired
+    private LikeService likeService;
 
     @Value("${server.servlet.context-path}")
     private String contextPath;
@@ -117,5 +121,20 @@ public class UserController {
         } catch (IOException e) {
             logger.error("文件传输失败！", e.getMessage());
         }
+    }
+
+    //个人主页
+    @RequestMapping(path = "/profile/{userId}", method = RequestMethod.GET)
+    public String getProfilePage(@PathVariable("userId") int userId, Model model) {
+        User user = hostHolder.getUser();
+        if(user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        model.addAttribute("user", user);
+        long likeCount = likeService.findUserLikeCount(userId);
+        model.addAttribute("likeCount", likeCount);
+
+        return "/site/profile";
     }
 }

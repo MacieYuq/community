@@ -1,6 +1,6 @@
 package com.qing.community.utils;
 
-public interface ActivationStatus {
+public interface CommunityConstant {
     int ACTIVATIONSUCCESS = 0;
     int ACTIVATIONREPEAT = 1;
     int ACTIVATIONFAIL = 2;

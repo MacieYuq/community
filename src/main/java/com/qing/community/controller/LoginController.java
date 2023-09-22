@@ -1,10 +1,9 @@
 package com.qing.community.controller;
 
 import com.google.code.kaptcha.Producer;
-import com.qing.community.config.KaptchaConfig;
 import com.qing.community.entity.User;
 import com.qing.community.service.UserService;
-import com.qing.community.utils.ActivationStatus;
+import com.qing.community.utils.CommunityConstant;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +26,7 @@ import java.io.OutputStream;
 import java.util.Map;
 
 @Controller
-public class LoginController implements ActivationStatus {
+public class LoginController implements CommunityConstant {
     public static final Logger logger = LoggerFactory.getLogger(LoginController.class);
     @RequestMapping(path = "/register", method = RequestMethod.GET)
     public String getRegisterPage(){

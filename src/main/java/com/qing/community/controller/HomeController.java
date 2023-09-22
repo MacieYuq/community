@@ -6,7 +6,11 @@ import com.qing.community.entity.DiscussPost;
 import com.qing.community.entity.Page;
 import com.qing.community.entity.User;
 import com.qing.community.service.DiscussPostService;
+import com.qing.community.service.LikeService;
+import com.qing.community.service.MessageService;
 import com.qing.community.service.UserService;
+import com.qing.community.utils.CommunityConstant;
+import com.qing.community.utils.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,12 +24,21 @@ import java.util.Map;
 
 
 @Controller
-public class HomeController {
+public class HomeController implements CommunityConstant {
     @Autowired
     private DiscussPostService discussPostService;
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private LikeService likeService;
+
+    @Autowired
+    private HostHolder hostHolder;
+
+    @Autowired
+    private MessageService messageService;
 
     @RequestMapping(path = "/index", method = RequestMethod.GET)
     //@responsebody注解表示将方法的返回值直接放到http响应体中，比如cookie
@@ -44,9 +57,17 @@ public class HomeController {
                 map.put("post",post);
                 User user = userService.findByUserById(post.getUserId());
                 map.put("user", user);
+
+                //点赞数量
+                long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId());
+                map.put("likeCount", likeCount);
                 discussPosts.add(map);
             }
         }
+        //查询总的未读私信数量
+        User user = hostHolder.getUser();
+        int letterUnreadCount = user == null ? 0: messageService.findLetterUnreadCount(user.getId(), null);
+        model.addAttribute("letterUnreadCount", letterUnreadCount);
         model.addAttribute("discussPosts", discussPosts);
         return "/index";
 

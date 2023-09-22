@@ -2,7 +2,7 @@ package com.qing.community.service;
 
 import com.qing.community.dao.CommentMapper;
 import com.qing.community.entity.Comment;
-import com.qing.community.utils.ActivationStatus;
+import com.qing.community.utils.CommunityConstant;
 import com.qing.community.utils.SensitiveFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ import org.springframework.web.util.HtmlUtils;
 import java.util.List;
 
 @Service
-public class CommentService  implements ActivationStatus {
+public class CommentService  implements CommunityConstant {
     @Autowired
     private CommentMapper commentMapper;
 

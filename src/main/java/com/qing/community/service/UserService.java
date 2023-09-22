@@ -4,7 +4,7 @@ import com.qing.community.dao.LoginTicketMapper;
 import com.qing.community.dao.UserMapper;
 import com.qing.community.entity.LoginTicket;
 import com.qing.community.entity.User;
-import com.qing.community.utils.ActivationStatus;
+import com.qing.community.utils.CommunityConstant;
 import com.qing.community.utils.MailClient;
 import com.qing.community.utils.RandomStr;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Random;
 
 @Service
-public class UserService implements ActivationStatus {
+public class UserService implements CommunityConstant {
     @Autowired
     private UserMapper userMapper;
 
