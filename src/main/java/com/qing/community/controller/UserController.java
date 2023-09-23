@@ -2,8 +2,10 @@ package com.qing.community.controller;
 
 import com.qing.community.annotation.LoginRequired;
 import com.qing.community.entity.User;
+import com.qing.community.service.FollowService;
 import com.qing.community.service.LikeService;
 import com.qing.community.service.UserService;
+import com.qing.community.utils.CommunityConstant;
 import com.qing.community.utils.HostHolder;
 import com.qing.community.utils.RandomStr;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,7 +30,7 @@ import java.io.OutputStream;
 
 @Controller
 @RequestMapping(path = "/user")
-public class UserController {
+public class UserController implements CommunityConstant {
     public static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
@@ -39,6 +41,9 @@ public class UserController {
 
     @Autowired
     private LikeService likeService;
+
+    @Autowired
+    private FollowService followService;
 
     @Value("${server.servlet.context-path}")
     private String contextPath;
@@ -125,15 +130,31 @@ public class UserController {
 
     //个人主页
     @RequestMapping(path = "/profile/{userId}", method = RequestMethod.GET)
+    @LoginRequired
     public String getProfilePage(@PathVariable("userId") int userId, Model model) {
-        User user = hostHolder.getUser();
+        User user = userService.findByUserById(userId);
         if(user == null) {
             throw new RuntimeException("用户不存在");
         }
 
         model.addAttribute("user", user);
+        //点赞数量
         long likeCount = likeService.findUserLikeCount(userId);
         model.addAttribute("likeCount", likeCount);
+
+        //关注数量
+        long followeeCount = followService.findFolloweeCount(userId, ENTITY_TYPE_USER );//注意不是登录用户的id，而是主页所属用户的id
+        model.addAttribute("followeeCount", followeeCount);
+
+        //粉丝数量
+        long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER, userId);//注意不是登录用户的id，而是主页所属用户的id
+        model.addAttribute("followerCount", followerCount);
+
+        //是否关注
+        boolean hasFollowed = false;
+        //key里面的id是登录用户的，value里的id是当前主页用户的
+        hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), ENTITY_TYPE_USER, userId);
+        model.addAttribute("hasFollowed", hasFollowed);
 
         return "/site/profile";
     }
