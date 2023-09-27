@@ -82,7 +82,7 @@ public class FollowService implements CommunityConstant {
         List<Map<String, Object>> followeeList = new ArrayList<>();
         for (Integer id : targetIds) {
             Map<String, Object> map = new HashMap<>();
-            User user = userService.findByUserById(id);
+            User user = userService.findUserById(id);
             map.put("user", user);
             Double score = redisTemplate.opsForZSet().score(followeeKey, id);
             map.put("followTime", new Date(score.longValue()));
@@ -101,7 +101,7 @@ public class FollowService implements CommunityConstant {
         List<Map<String, Object>> followerList = new ArrayList<>();
         for (Integer id : targetIds) {
             Map<String, Object> map = new HashMap<>();
-            User user = userService.findByUserById(id);
+            User user = userService.findUserById(id);
             map.put("user", user);
             Double score = redisTemplate.opsForZSet().score(followerKey, id);
             map.put("followTime", new Date(score.longValue()));

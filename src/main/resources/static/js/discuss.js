@@ -1,7 +1,7 @@
-function like(btn, entityType, entityId, entityUserId) {
+function like(btn, entityType, entityId, entityUserId, postId) {
     $.post(
         CONTEXT_PATH + "/like",
-        {"entityType":entityType, "entityId":entityId, "entityUserId":entityUserId},//controller层的like方法携带的参数
+        {"entityType":entityType, "entityId":entityId, "entityUserId":entityUserId, "postId": postId},//controller层的like方法携带的参数
         function (data) {
             data = $.parseJSON(data);//解析controller里传来的json字符串
             if(data.code == 0) {

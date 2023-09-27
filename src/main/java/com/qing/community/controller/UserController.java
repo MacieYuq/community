@@ -9,13 +9,11 @@ import com.qing.community.utils.CommunityConstant;
 import com.qing.community.utils.HostHolder;
 import com.qing.community.utils.RandomStr;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.PushBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -132,7 +130,7 @@ public class UserController implements CommunityConstant {
     @RequestMapping(path = "/profile/{userId}", method = RequestMethod.GET)
     @LoginRequired
     public String getProfilePage(@PathVariable("userId") int userId, Model model) {
-        User user = userService.findByUserById(userId);
+        User user = userService.findUserById(userId);
         if(user == null) {
             throw new RuntimeException("用户不存在");
         }

@@ -1,7 +1,5 @@
 package com.qing.community.controller;
 
-import com.qing.community.dao.DiscussPostMapper;
-import com.qing.community.dao.UserMapper;
 import com.qing.community.entity.DiscussPost;
 import com.qing.community.entity.Page;
 import com.qing.community.entity.User;
@@ -55,7 +53,7 @@ public class HomeController implements CommunityConstant {
             for(DiscussPost post : list){
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("post",post);
-                User user = userService.findByUserById(post.getUserId());
+                User user = userService.findUserById(post.getUserId());
                 map.put("user", user);
 
                 //点赞数量
@@ -65,9 +63,9 @@ public class HomeController implements CommunityConstant {
             }
         }
         //查询总的未读私信数量
-        User user = hostHolder.getUser();
-        int letterUnreadCount = user == null ? 0: messageService.findLetterUnreadCount(user.getId(), null);
-        model.addAttribute("letterUnreadCount", letterUnreadCount);
+//        User user = hostHolder.getUser();
+//        int letterUnreadCount = user == null ? 0: messageService.findLetterUnreadCount(user.getId(), null);
+//        model.addAttribute("letterUnreadCount", letterUnreadCount);
         model.addAttribute("discussPosts", discussPosts);
         return "/index";
 

@@ -5,9 +5,11 @@ import com.qing.community.entity.User;
 import com.qing.community.service.UserService;
 import com.qing.community.utils.CookieUtil;
 import com.qing.community.utils.HostHolder;
+import com.qing.community.utils.RedisKeyUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -22,15 +24,20 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
     @Autowired
     private HostHolder hostHolder;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String ticket = CookieUtil.getCookieValue(request, "ticket");
+        String ticketKey = RedisKeyUtil.getTicketKey(ticket);
         if (ticket != null){
         //从数据库中获取该凭证并检查有效性
-            LoginTicket loginTicket = userService.findTicket(ticket);
+//            LoginTicket loginTicket = userService.findTicket(ticket);
+            LoginTicket loginTicket = (LoginTicket) redisTemplate.opsForValue().get(ticketKey);
             if (loginTicket != null && loginTicket.getStatus() == 0 && loginTicket.getExpired().after(new Date())){
                 //根据该凭证查询用户，并在本次请求中保存持有该用户
-                User user= userService.findByUserById(loginTicket.getUserId());
+                User user= userService.findUserById(loginTicket.getUserId());
                 hostHolder.setUser(user);
             }
         }

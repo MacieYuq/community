@@ -33,6 +33,11 @@ public class ServiceLogAspect {
         // 用户[1.2.3.4],在[xxx],访问了[com.qing.community.service.xxx()].
         //获取当前request，通过request获取当前用户ip
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        //AOP拦截的是service中的所有方法，如果是正常请求会有request，但是在EventConsumer调用的MessageService，
+        // 不是正常http请求，没有request。所以RequestContextHolder.getRequestAttributes();会返回空指针。
+        if (attributes == null) {
+            return;
+        }
         HttpServletRequest request = attributes.getRequest();
         String ip = request.getRemoteHost();
         String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());

@@ -124,7 +124,7 @@ public class LoginController implements CommunityConstant {
     @RequestMapping(path = "/login", method = RequestMethod.POST)
     public String login(String username, String password, String code, boolean rem,
                         /*HttpSession session,*/ HttpServletResponse response, Model model,
-                        @CookieValue("kaptchaOwner") String kaptchaOwner){
+                        @CookieValue(value = "kaptchaOwner", required = false) String kaptchaOwner){
         //检查验证码
         //String kaptcha = (String) session.getAttribute("kaptcha");
         //从redis获取验证码

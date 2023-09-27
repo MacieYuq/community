@@ -1,5 +1,7 @@
 package com.qing.community.controller;
 
+import com.qing.community.Event.EventProducer;
+import com.qing.community.entity.Event;
 import com.qing.community.entity.Page;
 import com.qing.community.entity.User;
 import com.qing.community.service.FollowService;
@@ -30,11 +32,23 @@ public class FollowController implements CommunityConstant {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     @RequestMapping(path = "/follow", method = RequestMethod.POST)
     @ResponseBody
     public String follow(int entityType, int entityId) {
         User user = hostHolder.getUser();
         followService.follow(user.getId(), entityType, entityId);
+
+        // 触发关注事件
+        Event event = new Event()
+                .setTopic(TOPIC_FOLLOW)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(entityType)
+                .setEntityId(entityId)
+                .setEntityUserId(entityId);
+        eventProducer.fireEvent(event);
         return CommunityUtil.getJSONString(0, "已关注");
     }
 
@@ -56,7 +70,7 @@ public class FollowController implements CommunityConstant {
 
     @RequestMapping(path = "/followees/{userId}", method = RequestMethod.GET)
     public String getFollowees(@PathVariable("userId") int userId, Page page, Model model) {
-        User user = userService.findByUserById(userId);
+        User user = userService.findUserById(userId);
         if(user == null) {
             throw new RuntimeException("用户不存在");
         }
@@ -80,7 +94,7 @@ public class FollowController implements CommunityConstant {
 
     @RequestMapping(path = "/followers/{userId}", method = RequestMethod.GET)
     public String getFollowers(@PathVariable("userId") int userId, Page page, Model model) {
-        User user = userService.findByUserById(userId);
+        User user = userService.findUserById(userId);
         if (user == null) {
             throw new RuntimeException("该用户不存在!");
         }

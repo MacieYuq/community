@@ -65,7 +65,7 @@ public class DiscussPostController implements CommunityConstant {
         DiscussPost post = discussPostService.findDiscussPostById(discussPostId);
         model.addAttribute("post", post);
         //帖子作者
-        User user = userService.findByUserById(post.getUserId());
+        User user = userService.findUserById(post.getUserId());
         model.addAttribute("user", user);
 
         //点赞数量
@@ -91,7 +91,7 @@ public class DiscussPostController implements CommunityConstant {
             for (Comment comment : commentList) {
                 Map<String, Object> commentVo = new HashMap<>();
                 commentVo.put("comment", comment);//放入评论
-                commentVo.put("user", userService.findByUserById(comment.getUserId()));//放入作者
+                commentVo.put("user", userService.findUserById(comment.getUserId()));//放入作者
 
                 //评论点赞数量
                 likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_COMMENT, comment.getId());
@@ -110,9 +110,9 @@ public class DiscussPostController implements CommunityConstant {
                     for (Comment reply : replyList) {
                         Map<String, Object> replyVo = new HashMap<>();
                         replyVo.put("reply", reply);
-                        replyVo.put("user", userService.findByUserById(reply.getUserId()));
+                        replyVo.put("user", userService.findUserById(reply.getUserId()));
                         //targetid为0表示没有回复对象，是主贴评论
-                        User target = reply.getTargetId() == 0 ? null : userService.findByUserById(reply.getTargetId());
+                        User target = reply.getTargetId() == 0 ? null : userService.findUserById(reply.getTargetId());
                         replyVo.put("target", target);
                         // 回复的点赞数量
                         likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_COMMENT, reply.getId());
